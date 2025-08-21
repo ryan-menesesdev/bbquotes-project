@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct FetchView: View {
     let vm = ViewModel()
@@ -33,14 +34,14 @@ struct FetchView: View {
                                 .padding(.horizontal)
                             
                             ZStack(alignment: .bottom) {
-                                AsyncImage(url: vm.character.images[0]) { img in
+                                AsyncImage(url: vm.character.images.randomElement()) { img in
                                     img
                                         .resizable()
                                         .scaledToFit()
                                 } placeholder: {
                                     ProgressView()
                                 }
-                                .frame(width: geo.size.width/1.1, height: geo.size.height/1.8)
+                                .frame(width: geo.size.width/0.2, height: geo.size.height/1.8)
                                 
                                 Text(vm.quote.character)
                                     .foregroundStyle(.white)
@@ -57,6 +58,8 @@ struct FetchView: View {
                         case .sucessEpisode:
                             EpisodeView(episode: vm.episode)
                                 
+                        case .sucessCharacter:
+                            RandomCharacterView(character: vm.character)
                             
                         case .failed:
                             Text("Not possible")
@@ -96,8 +99,24 @@ struct FetchView: View {
                         .background(Color("\(show.replacingOccurrences(of: " ", with: ""))Button"))
                         .shadow(color: Color("\(show.replacingOccurrences(of: " ", with: ""))Shadow"), radius: 2)
                         .clipShape(.rect(cornerRadius: 10))
+                        
+                        Spacer()
+                        
+                        Button {
+                            Task {
+                                await vm.getCharacterData(for: show)
+                            }
+                        } label: {
+                            Text("Get Random Character")
+                        }
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                        .padding()
+                        .background(Color("\(show.replacingOccurrences(of: " ", with: ""))Button"))
+                        .shadow(color: Color("\(show.replacingOccurrences(of: " ", with: ""))Shadow"), radius: 2)
+                        .clipShape(.rect(cornerRadius: 10))
                     }
-                    .padding(.horizontal, 30)
+                    .padding(.horizontal, 15)
                     
                     Spacer(minLength: 95)
                 }
@@ -105,6 +124,11 @@ struct FetchView: View {
                 
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .onAppear {
+                Task {
+                    await vm.getQuoteData(for: show)
+                }
+            }
         }
         .ignoresSafeArea()
         .toolbarBackgroundVisibility(.visible, for: .tabBar)

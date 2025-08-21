@@ -21,7 +21,7 @@ struct FetchService {
         
         return quote
     }
-    
+
     func fetchDeath(from character: String) async throws -> Death? {
         let fetchUrl = baseUrl.appending(path: "deaths")
         
@@ -63,6 +63,27 @@ struct FetchService {
         let characters = try decoder.decode([Char].self, from: data)
             
         return characters[0]
+    }
+    
+    func fetchCharFromProduction(from show: String) async throws -> Char {
+        let characterUrl = baseUrl.appending(path: "characters/random")
+        
+        while true {
+            let (data, response) = try await URLSession.shared.data(from: characterUrl)
+            
+            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+                throw FetchError.badResponse
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            
+            let character = try decoder.decode(Char.self, from: data)
+            
+            if character.productions.contains(show) {
+                return character
+            }
+        }
     }
     
     func fetchEpisode(from show: String) async throws -> Episode? {

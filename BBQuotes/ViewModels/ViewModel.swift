@@ -8,6 +8,7 @@ class ViewModel {
         case fetching
         case sucessQuote
         case sucessEpisode
+        case sucessCharacter
         case failed(error: Error)
     }
         
@@ -57,6 +58,18 @@ class ViewModel {
             }
             
             status = .sucessEpisode
+        } catch {
+            status = .failed(error: error)
+        }
+    }
+    
+    func getCharacterData(for show: String) async {
+        status = .fetching
+        do {
+            character = try await fetcher.fetchCharFromProduction(from: show)
+            character.death = try await fetcher.fetchDeath(from: character.name)
+
+            status = .sucessCharacter
         } catch {
             status = .failed(error: error)
         }

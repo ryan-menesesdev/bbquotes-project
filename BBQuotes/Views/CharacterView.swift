@@ -100,6 +100,7 @@ struct CharacterView: View {
                             .tint(.primary)
                             
                         }
+                        .padding(.bottom, 32)
                         .frame(width: geo.size.width/1.2, alignment: .leading)
                         .id(1)
                     }
